@@ -30,6 +30,16 @@ class ProveedoreController extends Controller
      */
     public function store(Request $request)
     {
+        $existingProveedor = Proveedore::where('documento_identificacion', $request->documento_identificacion)->exists();
+        if ($existingProveedor) {
+            return response()->json(['message' => 'Ya existe un proveedor con ese documento de identificacion'], 400);
+        }
+
+        $existingEmail = Proveedore::where('email', $request->email)->exists();
+        if ($existingEmail) {
+            return response()->json(['message' => 'Ya existe un proveedor con ese email'], 400);
+        }
+
         $proveedor = new Proveedore;
         $proveedor->documento_identificacion = $request->documento_identificacion;
         $proveedor->nombre = $request->nombre;
@@ -53,12 +63,7 @@ class ProveedoreController extends Controller
      */
     public function show(Proveedore $proveedore)
     {
-        $proveedore = Proveedore::find($proveedore->id);
-        if (!$proveedore){
-            return response()->json([
-                'message' => 'No existe un proveedor con aquel id'
-            ]);
-        }
+        $proveedore = Proveedore::find($proveedore->id);        
         return response()->json($proveedore);
     }
 
@@ -103,4 +108,11 @@ class ProveedoreController extends Controller
         ];
         return response($data);
     }
+
+    public function proveedorAll(Proveedore $proveedore)
+    {
+        $proveedore = Proveedore::with('facturas.detalles')->find($proveedore->id);
+        return response()->json($proveedore);
+    }
+
 }
